@@ -9,12 +9,15 @@ from stock_dash_etl.config import PipelineConfig
 
 def build_silver_frame(spark: SparkSession, config: PipelineConfig) -> DataFrame:
     bronze_frame = spark.table(config.bronze_table_name).filter(F.col("api_status") == F.lit("ok"))
-    time_series_path = f"$['Time Series ({config.interval})']"
     quote_map_schema = T.MapType(T.StringType(), T.MapType(T.StringType(), T.StringType()))
+    payload_schema = T.StructType([T.StructField(config.time_series_key, quote_map_schema, True)])
 
-    payload_map = bronze_frame.withColumn("time_series_json", F.get_json_object(F.col("raw_payload"), time_series_path)).withColumn(
+    payload_map = bronze_frame.withColumn(
+        "payload_struct",
+        F.from_json(F.col("raw_payload"), payload_schema),
+    ).withColumn(
         "quote_map_by_ts",
-        F.from_json(F.col("time_series_json"), quote_map_schema),
+        F.col("payload_struct").getField(config.time_series_key),
     )
 
     exploded = payload_map.select(
@@ -27,7 +30,10 @@ def build_silver_frame(spark: SparkSession, config: PipelineConfig) -> DataFrame
 
     silver = exploded.select(
         F.col("symbol"),
-        F.to_timestamp("event_ts_raw").alias("event_ts"),
+        F.coalesce(
+            F.to_timestamp("event_ts_raw", "yyyy-MM-dd HH:mm:ss"),
+            F.to_timestamp("event_ts_raw", "yyyy-MM-dd"),
+        ).alias("event_ts"),
         F.col("quote_map")["1. open"].cast("double").alias("open_price"),
         F.col("quote_map")["2. high"].cast("double").alias("high_price"),
         F.col("quote_map")["3. low"].cast("double").alias("low_price"),
