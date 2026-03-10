@@ -94,9 +94,28 @@ Recommended demo modes:
 
 Preferred deployment order:
 
-1. Databricks Apps with Streamlit
-2. Databricks Apps with Dash
-3. Streamlit Cloud using exported Gold data
+1. Databricks Apps with Streamlit (queries Gold table directly via SQL warehouse)
+2. Streamlit Cloud using exported Gold CSV data
+
+The Streamlit app auto-detects its environment:
+
+- **Databricks Apps**: reads from the Gold Delta table via `databricks-sql-connector` and your serverless SQL warehouse
+- **Streamlit Cloud / local**: reads from the Gold CSV export at `UI_FALLBACK_GOLD_PATH`
+
+### Deploying to Databricks Apps
+
+1. In your Databricks workspace, create a new App and point it to `app/streamlit_app.py`
+2. Set the following environment variables in the App configuration:
+   - `DATABRICKS_HOST` — your workspace URL (e.g. `https://dbc-xxxxx.cloud.databricks.com`)
+   - `DATABRICKS_SQL_WAREHOUSE_ID` — your serverless SQL warehouse ID
+   - `DATABRICKS_TOKEN` — a personal access token (or leave empty if the App inherits credentials)
+3. The app will query `stock_demo.gold_stock_kpis` directly — no CSV export needed
+
+### Running on Streamlit Cloud
+
+1. Export the Gold CSV by running notebook 3 (works when `/dbfs/` is writable, otherwise skip)
+2. Or commit a local `data/demo_gold.csv` to the repo
+3. Deploy to Streamlit Cloud pointing at `app/streamlit_app.py`
 
 The UI focuses on:
 
@@ -125,6 +144,7 @@ The PySpark ETL itself still needs Databricks notebook compute with Spark suppor
 Alpha Vantage offers public stock market APIs, but the free tier is rate-limited to 25 API requests per day and 5 API requests per minute. This starter mitigates that by:
 
 - Tracking a small watchlist
+- Defaulting to the free `TIME_SERIES_DAILY` endpoint instead of premium intraday endpoints
 - Using a safer default polling interval of 4 hours for a 3-symbol watchlist
 - Spacing requests about 12 seconds apart inside each Bronze batch
 - Failing fast when your configured watchlist and polling cadence would exceed the daily free-tier budget
@@ -132,6 +152,8 @@ Alpha Vantage offers public stock market APIs, but the free tier is rate-limited
 - Recommending demo-focused rather than always-on execution
 
 With the default watchlist of `AAPL`, `MSFT`, and `NVDA`, a 4-hour polling cadence results in about 18 requests per day, leaving some headroom for manual testing.
+
+The default configuration now uses daily market data. Repeated runs on the same trading day may produce the same source date until Alpha Vantage publishes the next daily bar. The Silver layer deduplicates by symbol and event timestamp.
 
 The Alpha Vantage Postman collection is useful for manually exploring endpoints and testing request shapes during development:
 
@@ -152,6 +174,8 @@ Copy `.env.example` to `.env` and provide your Alpha Vantage key.
 
 Recommended free-tier settings:
 
+- `ALPHA_VANTAGE_FUNCTION=TIME_SERIES_DAILY`
+- `DEFAULT_INTERVAL=daily`
 - `POLL_SECONDS=14400`
 - `ALPHA_VANTAGE_MAX_REQUESTS_PER_DAY=25`
 - `ALPHA_VANTAGE_MAX_REQUESTS_PER_MINUTE=5`

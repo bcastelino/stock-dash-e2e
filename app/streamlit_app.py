@@ -11,27 +11,32 @@ repo_root = Path(__file__).resolve().parents[1] if "__file__" in globals() else 
 sys.path.insert(0, str(repo_root / "src"))
 
 from stock_dash_etl.config import load_config
-from stock_dash_etl.metrics import read_gold_for_ui
+from stock_dash_etl.metrics import is_databricks_apps, read_gold_for_ui, read_gold_from_sql
 
 st.set_page_config(page_title="Stock Dash ETL Monitor", layout="wide")
 
 config = load_config()
 gold_path = config.ui_fallback_gold_file
+_EMPTY_COLUMNS = [
+    "symbol",
+    "latest_event_ts",
+    "latest_close_price",
+    "price_change",
+    "price_change_pct",
+    "avg_close_price",
+    "max_volume",
+    "minutes_since_ingestion",
+]
+_USE_SQL = is_databricks_apps()
 
-def _load_frame(path: Path) -> pd.DataFrame:
-    frame = read_gold_for_ui(path)
+
+def _load_frame() -> pd.DataFrame:
+    if _USE_SQL:
+        frame = read_gold_from_sql(config.gold_table_name)
+    else:
+        frame = read_gold_for_ui(gold_path)
     if frame.empty:
-        columns = [
-            "symbol",
-            "latest_event_ts",
-            "latest_close_price",
-            "price_change",
-            "price_change_pct",
-            "avg_close_price",
-            "max_volume",
-            "minutes_since_ingestion",
-        ]
-        return pd.DataFrame(columns=columns)
+        return pd.DataFrame(columns=_EMPTY_COLUMNS)
     return frame
 
 
@@ -46,7 +51,7 @@ def _metric_value(frame: pd.DataFrame, column: str) -> str:
     return str(value)
 
 
-frame = _load_frame(gold_path)
+frame = _load_frame()
 
 st.title("Databricks Free ETL Pipeline Monitor")
 st.caption("Alpha Vantage -> Bronze -> Silver -> Gold -> Streamlit")
@@ -55,9 +60,8 @@ with st.sidebar:
     st.subheader("Configuration")
     st.write(f"Symbols: {', '.join(config.symbols)}")
     st.write(f"Interval: {config.interval}")
-    st.write(f"Gold export: {gold_path}")
-    st.write("Preferred host: Databricks Apps")
-    st.write("Fallback host: Streamlit Cloud")
+    st.write(f"Data source: {'SQL warehouse' if _USE_SQL else f'CSV ({gold_path})'}")
+    st.write(f"Host: {'Databricks Apps' if _USE_SQL else 'Streamlit Cloud'}")
 
 if frame.empty:
     st.warning("No Gold export found yet. Run the Bronze, Silver, and Gold pipeline scripts first.")
