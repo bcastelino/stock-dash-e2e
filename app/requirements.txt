@@ -1,5 +1,0 @@
-databricks-sql-connector==3.6.0
-pandas==2.2.3
-plotly==6.0.1
-PyYAML==6.0.2
-streamlit==1.43.2

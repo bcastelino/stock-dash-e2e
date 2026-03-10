@@ -24,22 +24,39 @@ def is_databricks_apps() -> bool:
 def read_gold_from_sql(gold_table: str) -> pd.DataFrame:
     try:
         from databricks import sql as dbsql
+        from databricks.sdk.core import Config, oauth_service_principal
     except ImportError:
         return pd.DataFrame()
 
     host = os.getenv("DATABRICKS_HOST", "").strip().rstrip("/")
     warehouse_id = os.getenv("DATABRICKS_SQL_WAREHOUSE_ID", "").strip()
-    token = os.getenv("DATABRICKS_TOKEN", "").strip()
 
     if not host or not warehouse_id:
         return pd.DataFrame()
 
+    server_hostname = host.replace("https://", "").replace("http://", "")
     http_path = f"/sql/1.0/warehouses/{warehouse_id}"
-    conn_kwargs: dict = {"server_hostname": host.replace("https://", ""), "http_path": http_path}
-    if token:
-        conn_kwargs["access_token"] = token
 
-    with dbsql.connect(**conn_kwargs) as conn:
+    try:
+        cfg = Config()
+        def credential_provider():
+            return oauth_service_principal(cfg)
+        conn = dbsql.connect(
+            server_hostname=server_hostname,
+            http_path=http_path,
+            credentials_provider=credential_provider,
+        )
+    except Exception:
+        token = os.getenv("DATABRICKS_TOKEN", "").strip()
+        if not token:
+            return pd.DataFrame()
+        conn = dbsql.connect(
+            server_hostname=server_hostname,
+            http_path=http_path,
+            access_token=token,
+        )
+
+    with conn:
         with conn.cursor() as cursor:
             cursor.execute(f"SELECT * FROM {gold_table}")
             columns = [desc[0] for desc in cursor.description]

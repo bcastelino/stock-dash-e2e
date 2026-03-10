@@ -1,0 +1,21 @@
+command:
+  - streamlit
+  - run
+  - app/streamlit_app.py
+  - --server.port
+  - "8501"
+  - --server.headless
+  - "true"
+
+env:
+  - name: DATABRICKS_SQL_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  - name: ALPHA_VANTAGE_API_KEY
+    valueFrom: secret
+
+resources:
+  - name: sql-warehouse
+    type: sql_warehouse
+  - name: secret
+    type: secret
+    key: alpha-vantage-api-key

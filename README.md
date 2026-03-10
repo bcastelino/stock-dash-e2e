@@ -104,12 +104,19 @@ The Streamlit app auto-detects its environment:
 
 ### Deploying to Databricks Apps
 
-1. In your Databricks workspace, create a new App and point it to `app/streamlit_app.py`
-2. Set the following environment variables in the App configuration:
-   - `DATABRICKS_HOST` — your workspace URL (e.g. `https://dbc-xxxxx.cloud.databricks.com`)
-   - `DATABRICKS_SQL_WAREHOUSE_ID` — your serverless SQL warehouse ID
-   - `DATABRICKS_TOKEN` — a personal access token (or leave empty if the App inherits credentials)
-3. The app will query `stock_demo.gold_stock_kpis` directly — no CSV export needed
+1. Create the App in your Databricks workspace (e.g. `stock-dash-monitor`)
+2. Add App resources:
+   - **sql-warehouse** (type: SQL warehouse) — your serverless SQL warehouse
+   - **secret** (type: Secret) — key: `alpha-vantage-api-key`
+3. Sync source files and deploy:
+
+```bash
+databricks sync --watch . /Workspace/Users/<your-email>/stock-dash-monitor
+databricks apps deploy stock-dash-monitor --source-code-path /Workspace/Users/<your-email>/stock-dash-monitor
+```
+
+1. The `app.yaml` at the repo root defines the startup command, environment variable mappings, and resource declarations
+2. The app will query `stock_demo.gold_stock_kpis` directly via the SQL warehouse — no CSV export needed
 
 ### Running on Streamlit Cloud
 
