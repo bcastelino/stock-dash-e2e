@@ -3,8 +3,8 @@ symbols:
   - MSFT
   - NVDA
 settings:
-  function: TIME_SERIES_INTRADAY
-  interval: 5min
+  function: TIME_SERIES_DAILY
+  interval: daily
   outputsize: compact
   poll_seconds: 14400
   max_requests_per_day: 25

@@ -18,17 +18,16 @@ def fetch_intraday_payload(
         raise ValueError("ALPHA_VANTAGE_API_KEY is required.")
 
     client = session or requests.Session()
-    response = client.get(
-        config.base_url,
-        params={
-            "function": config.function_name,
-            "symbol": symbol,
-            "interval": config.interval,
-            "outputsize": config.outputsize,
-            "apikey": config.api_key,
-        },
-        timeout=30,
-    )
+    params = {
+        "function": config.function_name,
+        "symbol": symbol,
+        "outputsize": config.outputsize,
+        "apikey": config.api_key,
+    }
+    if config.function_name == "TIME_SERIES_INTRADAY":
+        params["interval"] = config.interval
+
+    response = client.get(config.base_url, params=params, timeout=30)
     response.raise_for_status()
     payload = response.json()
 
