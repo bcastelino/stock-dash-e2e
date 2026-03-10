@@ -31,8 +31,8 @@ def build_silver_frame(spark: SparkSession, config: PipelineConfig) -> DataFrame
     silver = exploded.select(
         F.col("symbol"),
         F.coalesce(
-            F.to_timestamp("event_ts_raw", "yyyy-MM-dd HH:mm:ss"),
-            F.to_timestamp("event_ts_raw", "yyyy-MM-dd"),
+            F.try_to_timestamp("event_ts_raw", F.lit("yyyy-MM-dd HH:mm:ss")),
+            F.try_to_timestamp("event_ts_raw", F.lit("yyyy-MM-dd")),
         ).alias("event_ts"),
         F.col("quote_map")["1. open"].cast("double").alias("open_price"),
         F.col("quote_map")["2. high"].cast("double").alias("high_price"),
