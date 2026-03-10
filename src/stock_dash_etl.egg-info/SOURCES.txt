@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+src/stock_dash_etl/__init__.py
+src/stock_dash_etl/alphavantage.py
+src/stock_dash_etl/bronze.py
+src/stock_dash_etl/config.py
+src/stock_dash_etl/gold.py
+src/stock_dash_etl/metrics.py
+src/stock_dash_etl/schemas.py
+src/stock_dash_etl/silver.py
+src/stock_dash_etl.egg-info/PKG-INFO
+src/stock_dash_etl.egg-info/SOURCES.txt
+src/stock_dash_etl.egg-info/dependency_links.txt
+src/stock_dash_etl.egg-info/requires.txt
+src/stock_dash_etl.egg-info/top_level.txt
