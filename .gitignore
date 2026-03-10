@@ -1,0 +1,12 @@
+__pycache__/
+.pytest_cache/
+.venv/
+.env
+.streamlit/secrets.toml
+*.pyc
+*.pyo
+*.pyd
+*.log
+.ipynb_checkpoints/
+dist/
+build/

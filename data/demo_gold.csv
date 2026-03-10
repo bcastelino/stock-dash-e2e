@@ -1,0 +1,4 @@
+symbol,latest_event_ts,latest_open_price,latest_high_price,latest_low_price,latest_close_price,previous_close_price,price_change,price_change_pct,avg_close_price,max_volume,intraday_range,row_count,latest_ingested_at,minutes_since_ingestion
+AAPL,2026-03-10 10:00:00,176.10,177.22,175.84,176.95,176.32,0.63,0.36,175.88,32100541,1.38,12,2026-03-10 10:05:00,12.0
+MSFT,2026-03-10 10:00:00,413.55,415.10,412.48,414.72,413.66,1.06,0.26,412.91,18420442,2.62,12,2026-03-10 10:05:00,12.0
+NVDA,2026-03-10 10:00:00,901.40,912.55,898.77,909.86,903.44,6.42,0.71,897.13,28755480,13.78,12,2026-03-10 10:05:00,12.0

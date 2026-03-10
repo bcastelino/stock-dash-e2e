@@ -1,0 +1,11 @@
+symbols:
+  - AAPL
+  - MSFT
+  - NVDA
+settings:
+  function: TIME_SERIES_INTRADAY
+  interval: 5min
+  outputsize: compact
+  poll_seconds: 14400
+  max_requests_per_day: 25
+  max_requests_per_minute: 5
