@@ -6,7 +6,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
 
 
 @dataclass(frozen=True)
@@ -117,7 +120,7 @@ def _default_ui_fallback_gold_path() -> str:
 
 def load_config(env_file: str | None = None, watchlist_path: str | None = None) -> PipelineConfig:
     env_path = Path(env_file) if env_file else _repo_root() / ".env"
-    if env_path.exists():
+    if env_path.exists() and load_dotenv is not None:
         load_dotenv(env_path)
 
     resolved_watchlist = Path(watchlist_path) if watchlist_path else _repo_root() / "config" / "watchlist.yml"
