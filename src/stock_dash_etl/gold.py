@@ -68,9 +68,12 @@ def write_gold_table(spark: SparkSession, config: PipelineConfig) -> None:
     gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(config.gold_table_name)
 
 
-def export_gold_for_ui(spark: SparkSession, config: PipelineConfig) -> Path:
+def export_gold_for_ui(spark: SparkSession, config: PipelineConfig) -> Path | None:
     gold = build_gold_frame(spark, config)
     output_path = config.ui_fallback_gold_file
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    gold.toPandas().to_csv(output_path, index=False)
-    return output_path
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        gold.toPandas().to_csv(output_path, index=False)
+        return output_path
+    except OSError:
+        return None

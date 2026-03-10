@@ -70,7 +70,7 @@ for current_iteration in range(iterations):
             "bronze_records_written": len(records),
             "silver_rows": spark.table(config.silver_table_name).count(),
             "gold_rows": spark.table(config.gold_table_name).count(),
-            "ui_export": str(output_path),
+            "ui_export": str(output_path) if output_path else "skipped (path not writable)",
         }
     )
     if current_iteration + 1 < iterations:
