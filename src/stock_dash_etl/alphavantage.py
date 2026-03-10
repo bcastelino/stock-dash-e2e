@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from typing import Any
 
@@ -33,10 +34,17 @@ def fetch_intraday_payload(
 
     if "Error Message" in payload:
         raise RuntimeError(str(payload["Error Message"]))
+    if "Information" in payload:
+        raise RuntimeError(str(payload["Information"]))
     if "Note" in payload:
         raise RuntimeError(str(payload["Note"]))
     if resolve_time_series_key(payload) is None:
-        raise RuntimeError("Alpha Vantage response did not include a time series payload.")
+        payload_preview = json.dumps(payload)[:1000]
+        raise RuntimeError(
+            "Alpha Vantage response did not include a time series payload. "
+            f"Top-level keys: {', '.join(payload.keys()) or '<none>'}. "
+            f"Payload preview: {payload_preview}"
+        )
     return payload
 
 
