@@ -49,6 +49,22 @@ class PipelineConfig:
         return _qualify_table_name(self.catalog_name, self.schema_name, self.bronze_state_table)
 
     @property
+    def time_series_key(self) -> str:
+        if self.function_name == "TIME_SERIES_INTRADAY":
+            return f"Time Series ({self.interval})"
+        mapping = {
+            "TIME_SERIES_DAILY": "Time Series (Daily)",
+            "TIME_SERIES_DAILY_ADJUSTED": "Time Series (Daily)",
+            "TIME_SERIES_WEEKLY": "Weekly Time Series",
+            "TIME_SERIES_WEEKLY_ADJUSTED": "Weekly Adjusted Time Series",
+            "TIME_SERIES_MONTHLY": "Monthly Time Series",
+            "TIME_SERIES_MONTHLY_ADJUSTED": "Monthly Adjusted Time Series",
+        }
+        if self.function_name in mapping:
+            return mapping[self.function_name]
+        raise ValueError(f"Unsupported Alpha Vantage time series function: {self.function_name}")
+
+    @property
     def ui_fallback_gold_file(self) -> Path:
         path = Path(self.ui_fallback_gold_path)
         if path.is_absolute():
@@ -133,8 +149,8 @@ def load_config(env_file: str | None = None, watchlist_path: str | None = None) 
         api_key=os.getenv("ALPHA_VANTAGE_API_KEY", "").strip(),
         base_url=os.getenv("ALPHA_VANTAGE_BASE_URL", "https://www.alphavantage.co/query").strip(),
         symbols=symbols,
-        function_name=os.getenv("ALPHA_VANTAGE_FUNCTION", str(settings.get("function", "TIME_SERIES_INTRADAY"))).strip(),
-        interval=os.getenv("DEFAULT_INTERVAL", str(settings.get("interval", "5min"))).strip(),
+        function_name=os.getenv("ALPHA_VANTAGE_FUNCTION", str(settings.get("function", "TIME_SERIES_DAILY"))).strip(),
+        interval=os.getenv("DEFAULT_INTERVAL", str(settings.get("interval", "daily"))).strip(),
         outputsize=os.getenv("ALPHA_VANTAGE_OUTPUTSIZE", str(settings.get("outputsize", "compact"))).strip(),
         poll_seconds=int(os.getenv("POLL_SECONDS", str(settings.get("poll_seconds", 14400)))),
         max_requests_per_day=int(
