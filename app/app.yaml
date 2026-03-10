@@ -1,0 +1,16 @@
+command:
+  - streamlit
+  - run
+  - app/streamlit_app.py
+  - --server.port
+  - "8501"
+  - --server.headless
+  - "true"
+
+env:
+  - name: DATABRICKS_HOST
+    description: "Databricks workspace URL (e.g. https://dbc-xxxxx.cloud.databricks.com)"
+  - name: DATABRICKS_SQL_WAREHOUSE_ID
+    description: "Serverless SQL warehouse ID for querying Gold table"
+  - name: DATABRICKS_TOKEN
+    description: "Personal access token (optional if App inherits credentials)"
