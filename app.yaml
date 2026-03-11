@@ -5,10 +5,8 @@ command:
 
 env:
   - name: DATABRICKS_SQL_WAREHOUSE_ID
-    value: "ef7f63b5aa1f7b07"
     valueFrom: sql-warehouse
   - name: ALPHA_VANTAGE_API_KEY
-    value: "GPHS1GXG9P6BPN9X"
     valueFrom: secret
 
 resources:
