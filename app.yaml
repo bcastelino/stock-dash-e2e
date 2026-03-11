@@ -2,10 +2,6 @@ command:
   - "streamlit"
   - "run"
   - "app/streamlit_app.py"
-  - "--server.port"
-  - "8501"
-  - "--server.headless"
-  - "true"
 
 env:
   - name: DATABRICKS_SQL_WAREHOUSE_ID

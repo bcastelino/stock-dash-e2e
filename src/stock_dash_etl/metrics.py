@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
-from pyspark.sql import SparkSession, functions as F
 
 from stock_dash_etl.config import PipelineConfig
+
+if TYPE_CHECKING:
+    from pyspark.sql import SparkSession
 
 
 def collect_table_counts(spark: SparkSession, config: PipelineConfig) -> dict[str, int]:
@@ -76,6 +79,8 @@ def read_gold_for_ui(csv_path: str | Path) -> pd.DataFrame:
 
 
 def build_silver_history(spark: SparkSession, config: PipelineConfig):
+    from pyspark.sql import functions as F
+
     silver = spark.table(config.silver_table_name)
     return silver.select(
         "symbol",
